@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: orientec-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: orientec
+      POSTGRES_USER: orientec
+      POSTGRES_PASSWORD: orientec
+    ports:
+      - "5433:5432"
+    volumes:
+      - orientec_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orientec -d orientec"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: orientec-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_TTL: ${JWT_TTL:-PT24H}
+      ORIENTEC_ESTACAO_SESSAO_TTL: ${ORIENTEC_ESTACAO_SESSAO_TTL:-PT12H}
+      ORIENTEC_ESTACAO_LAUNCH_TTL: ${ORIENTEC_ESTACAO_LAUNCH_TTL:-PT1M}
+      ORIENTEC_SECURE_COOKIE: ${ORIENTEC_SECURE_COOKIE:-true}
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://postgres:5432/orientec
+      DB_USERNAME: orientec
+      DB_PASSWORD: orientec
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+
+volumes:
+  orientec_pgdata:

@@ -1,0 +1,132 @@
+spring:
+  application:
+    name: orientec-backend
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:25}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:false}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS:false}
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/orientec}
+    username: ${DB_USERNAME:orientec}
+    password: ${DB_PASSWORD:orientec}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: OrientecHikariPool
+      maximum-pool-size: ${DB_POOL_MAX:10}
+      minimum-idle: ${DB_POOL_MIN:2}
+      connection-timeout: 3000
+      validation-timeout: 1000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      keepalive-time: 30000
+      leak-detection-threshold: 0
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        format_sql: false
+        order_inserts: true
+        order_updates: true
+        jdbc.batch_size: 50
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    validate-on-migrate: true
+    clean-disabled: true
+    locations: classpath:db/migration
+
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+  servlet:
+    context-path: /
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when_authorized
+  health:
+    db:
+      enabled: true
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      externalService:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 20
+        minimumNumberOfCalls: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+  retry:
+    instances:
+      externalService:
+        maxAttempts: 3
+        waitDuration: 500ms
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+  timelimiter:
+    instances:
+      externalService:
+        timeoutDuration: 3s
+
+logging:
+  level:
+    root: INFO
+    br.com.orientec: INFO
+    org.springframework.security: INFO
+    org.flywaydb: INFO
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:ORIENTEC-DEV-ONLY-CHANGE-ME-32-BYTES-MINIMUM-SECRET}
+    ttl: ${JWT_TTL:PT24H}
+
+orientec:
+  autocomplete:
+    min-chars: ${ORIENTEC_AUTOCOMPLETE_MIN_CHARS:2}
+    limit: ${ORIENTEC_AUTOCOMPLETE_LIMIT:20}
+  estacao:
+    sessao-ttl: ${ORIENTEC_ESTACAO_SESSAO_TTL:PT12H}
+    launch-ttl: ${ORIENTEC_ESTACAO_LAUNCH_TTL:PT1M}
+  security:
+    secure-cookie: ${ORIENTEC_SECURE_COOKIE:false}
+  comunicacao:
+    email:
+      enabled: ${ORIENTEC_COMUNICACAO_EMAIL_ENABLED:false}
+      from: ${ORIENTEC_COMUNICACAO_EMAIL_FROM:}
+    webhook:
+      enabled: ${ORIENTEC_COMUNICACAO_WEBHOOK_ENABLED:false}
+      whatsapp-url: ${ORIENTEC_COMUNICACAO_WHATSAPP_URL:}
+      sms-url: ${ORIENTEC_COMUNICACAO_SMS_URL:}

@@ -1,0 +1,16 @@
+package br.com.orientec.backend.adapter.out.persistence.repository.cadastro;
+import br.com.orientec.backend.adapter.out.persistence.entity.cadastro.*;
+import br.com.orientec.backend.application.port.out.CrudPersistencePort;
+import br.com.orientec.backend.application.port.out.model.PageQuery;
+import br.com.orientec.backend.application.port.out.model.PageResult;
+import br.com.orientec.backend.adapter.out.persistence.SpringDataPageAdapter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface MarcaRepository extends JpaRepository<Marca,Integer>, CrudPersistencePort<Marca, Integer> {    Page<Marca> findByIdIsNotNull(Pageable pageable);
+    @Override
+    default PageResult<Marca> findAll(PageQuery query) {
+        return SpringDataPageAdapter.toResult(findByIdIsNotNull(SpringDataPageAdapter.toPageable(query)));
+    }
+}
