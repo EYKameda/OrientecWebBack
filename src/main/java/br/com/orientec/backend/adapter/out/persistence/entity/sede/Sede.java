@@ -15,6 +15,9 @@ public class Sede {
     @Column(length = 30)
     private String sigla;
 
+    @Column(name = "empresa_codigo")
+    private Long empresaCodigo;
+
     @Column(nullable = false)
     private boolean ativo = true;
 
@@ -23,8 +26,10 @@ public class Sede {
     public Long getCodigo() { return codigo; }
     public String getDescricao() { return descricao; }
     public String getSigla() { return sigla; }
+    public Long getEmpresaCodigo() { return empresaCodigo; }
     public boolean isAtivo() { return ativo; }
     public void setDescricao(String v) { descricao = v; }
     public void setSigla(String v) { sigla = v; }
+    public void setEmpresaCodigo(Long v) { empresaCodigo = v; }
     public void setAtivo(boolean v) { ativo = v; }
 }

@@ -120,8 +120,6 @@ orientec:
   estacao:
     sessao-ttl: ${ORIENTEC_ESTACAO_SESSAO_TTL:PT12H}
     launch-ttl: ${ORIENTEC_ESTACAO_LAUNCH_TTL:PT1M}
-  security:
-    secure-cookie: ${ORIENTEC_SECURE_COOKIE:false}
   comunicacao:
     email:
       enabled: ${ORIENTEC_COMUNICACAO_EMAIL_ENABLED:false}
@@ -130,3 +128,6 @@ orientec:
       enabled: ${ORIENTEC_COMUNICACAO_WEBHOOK_ENABLED:false}
       whatsapp-url: ${ORIENTEC_COMUNICACAO_WHATSAPP_URL:}
       sms-url: ${ORIENTEC_COMUNICACAO_SMS_URL:}
+
+  security:
+    secure-cookie: ${ORIENTEC_SECURE_COOKIE:false}

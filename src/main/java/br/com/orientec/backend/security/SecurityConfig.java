@@ -15,15 +15,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfig {
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwt) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwt, SecurityPolicyService policy) throws Exception {
         return http.csrf(c -> c.disable())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .httpBasic(h -> h.disable())
             .authorizeHttpRequests(a -> a
                 .requestMatchers("/actuator/health","/actuator/info",
                     "/swagger-ui/**","/swagger-ui.html","/v3/api-docs/**",
-                    "/api/v1/auth/login","/api/v1/stations/handshake","/api/v1/stations/exchange","/api/v1/stations/session","/api/v1/stations/heartbeat","/api/v1/ping").permitAll()
-                .anyRequest().authenticated())
+                    "/api/v1/auth/login","/api/v1/administrativo/**","/api/v1/security/mode","/api/v1/stations/handshake","/api/v1/stations/exchange","/api/v1/stations/session","/api/v1/stations/heartbeat","/api/v1/ping").permitAll()
+                .anyRequest().access((authentication, context) -> new org.springframework.security.authorization.AuthorizationDecision(
+                    !policy.isSecurityRequired() || (authentication.get() != null && authentication.get().isAuthenticated()))))
             .addFilterBefore(jwt, UsernamePasswordAuthenticationFilter.class)
             .build();
     }

@@ -13,9 +13,23 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService; private final SessaoUsuarioService sessoes;
-    public JwtAuthenticationFilter(JwtService jwtService,SessaoUsuarioService sessoes){this.jwtService=jwtService;this.sessoes=sessoes;}
+    private final SecurityPolicyService policy;
+    @org.springframework.beans.factory.annotation.Value("${ORIENTEC_SEDE_CODIGO:1}") private Long devSedeCodigo;
+    public JwtAuthenticationFilter(JwtService jwtService, SessaoUsuarioService sessoes, SecurityPolicyService policy) {
+        this.jwtService=jwtService; this.sessoes=sessoes; this.policy=policy;
+    }
     @Override protected void doFilterInternal(HttpServletRequest request,HttpServletResponse response,FilterChain chain)throws ServletException,IOException{
         String h=request.getHeader("Authorization");
+        if (policy.authenticationDisabled()) {
+            var principal = new JwtService.JwtPrincipal(1L, "DEV_LOCAL",
+                devSedeCodigo == null || devSedeCodigo <= 0 ? 1L : devSedeCodigo,
+                policy.developmentAuthorities().stream().map(a -> a.getAuthority().substring("PERM_".length()))
+                    .collect(java.util.stream.Collectors.toUnmodifiableSet()), java.util.UUID.randomUUID());
+            SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(principal, null, policy.developmentAuthorities()));
+            chain.doFilter(request, response);
+            return;
+        }
         if(h!=null&&h.startsWith("Bearer ")){
             try{
                 var p=jwtService.parse(h.substring(7)); sessoes.validarEAtualizar(p.sessaoId());
